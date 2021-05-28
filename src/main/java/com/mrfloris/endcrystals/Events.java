@@ -11,7 +11,6 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 
 public class Events
   implements Listener {
-  //public pluginEvents plugin;
   
   @EventHandler
   public void onEnity(EntityExplodeEvent event) {
@@ -26,9 +25,7 @@ public class Events
     if (event.getEntity() instanceof org.bukkit.entity.EnderCrystal) {
       Entity attacker = event.getDamager();
       World.Environment environment = event.getEntity().getWorld().getEnvironment();
-      if (environment == World.Environment.THE_END) {
-        event.setCancelled(false);
-      } else {
+      if (environment != World.Environment.THE_END) {
         if (event.getDamager() instanceof Arrow) {
           Arrow arrow = (Arrow)event.getDamager();
           if (arrow.getShooter() instanceof Player) {
