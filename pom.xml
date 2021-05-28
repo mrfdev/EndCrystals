@@ -11,7 +11,7 @@
 
     <name>1MB EndCrystals</name>
 
-    <description>1MB Helper plugin for dealing with server-wide endcrytal-damage events</description>
+    <description>1MB Helper plugin for dealing with server-wide endcrystal-damage events</description>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,6 +19,7 @@
     <url>https://github.com/mrfdev/EndCrystals</url>
 
     <build>
+        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -52,6 +53,7 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <finalName>1MB-${project.artifactId}</finalName>
     </build>
 
     <repositories>

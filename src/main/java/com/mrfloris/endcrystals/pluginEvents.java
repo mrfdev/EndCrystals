@@ -15,10 +15,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class pluginEvents
-        extends JavaPlugin
-{
-    private Listener Listener = new Events();
+public class pluginEvents extends JavaPlugin {
+    private final Listener Listener = new Events();
     public final Logger logger = Logger.getLogger("Minecraft");
     public static pluginEvents plugin;
 
