@@ -15,8 +15,11 @@ public class Events
   @EventHandler
   public void onEnity(EntityExplodeEvent event) {
     Entity entity = event.getEntity();
-    if (entity instanceof org.bukkit.entity.EnderCrystal) {
-      event.setCancelled(true);
+    World.Environment environment = event.getEntity().getWorld().getEnvironment();
+    if (environment != World.Environment.THE_END) {
+      if (entity instanceof org.bukkit.entity.EnderCrystal) {
+        event.setCancelled(true);
+      }
     }
   }
   
