@@ -10,19 +10,17 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 public class Events
-  implements Listener {
-  
+        implements Listener {
+  public pluginEvents plugin;
+
   @EventHandler
   public void onEnity(EntityExplodeEvent event) {
     Entity entity = event.getEntity();
-    World.Environment environment = event.getEntity().getWorld().getEnvironment();
-    if (environment != World.Environment.THE_END) {
-      if (entity instanceof org.bukkit.entity.EnderCrystal) {
-        event.setCancelled(true);
-      }
+    if (entity instanceof org.bukkit.entity.EnderCrystal) {
+      event.setCancelled(true);
     }
   }
-  
+
   @EventHandler
   public void onEnityBoom(EntityDamageByEntityEvent event) {
     if (event.getEntity() instanceof org.bukkit.entity.EnderCrystal) {
@@ -34,12 +32,12 @@ public class Events
           if (arrow.getShooter() instanceof Player) {
             Player player = (Player)arrow.getShooter();
             event.setCancelled(!player.hasPermission("pacocraft.break"));
-          } 
-        } 
+          }
+        }
         if (event.getDamager() instanceof Player) {
           event.setCancelled(!attacker.hasPermission("pacocraft.break"));
         }
-      } 
-    } 
+      }
+    }
   }
 }
