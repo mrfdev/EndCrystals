@@ -11,7 +11,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 
 public class Events
   implements Listener {
-  public pluginEvents plugin;
+  //public pluginEvents plugin;
   
   @EventHandler
   public void onEnity(EntityExplodeEvent event) {
@@ -33,19 +33,11 @@ public class Events
           Arrow arrow = (Arrow)event.getDamager();
           if (arrow.getShooter() instanceof Player) {
             Player player = (Player)arrow.getShooter();
-            if (player.hasPermission("pacocraft.break")) {
-              event.setCancelled(false);
-            } else {
-              event.setCancelled(true);
-            } 
+            event.setCancelled(!player.hasPermission("pacocraft.break"));
           } 
         } 
         if (event.getDamager() instanceof Player) {
-          if (((Player) attacker).hasPermission("pacocraft.break")) {
-            event.setCancelled(false);
-          } else {
-            event.setCancelled(true);
-          }
+          event.setCancelled(!attacker.hasPermission("pacocraft.break"));
         }
       } 
     } 
