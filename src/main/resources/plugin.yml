@@ -1,0 +1,9 @@
+name: ${project.artifactId}
+version: ${project.version}
+main: com.mrfloris.endcrystals
+api-version: 1.16
+prefix: ${project.name}
+author: adrianwowk
+authors: [mrfloris, the456gamer]
+description: ${project.description}
+website: ${project.url}
