@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 public record PluginConfig(
+        String localeName,
         List<String> commandAliases,
         boolean preventBlockDamage,
         boolean preventPlayerBreak,
@@ -82,14 +83,14 @@ public record PluginConfig(
             "SPRUCE_CHEST_BOAT"
     );
 
-    public static PluginConfig from(YamlConfiguration yaml) {
+    public static PluginConfig from(YamlConfiguration yaml, YamlConfiguration localeYaml, String localeName) {
         Map<String, String> messages = new LinkedHashMap<>();
-        messages.put("no-permission", yaml.getString("messages.no-permission", "<red>You do not have permission to do that.</red>"));
-        messages.put("reloaded", yaml.getString("messages.reloaded", "<green>Configuration reloaded from <white>%path%</white>.</green>"));
-        messages.put("toggle-updated", yaml.getString("messages.toggle-updated", "<green><white>%setting%</white> is now <white>%value%</white>.</green>"));
-        messages.put("unknown-setting", yaml.getString("messages.unknown-setting", "<red>Unknown toggle: <white>%setting%</white></red>"));
-        messages.put("command-usage", yaml.getString("messages.command-usage", "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>"));
-        messages.put("player-break-blocked", yaml.getString("messages.player-break-blocked", "<red>These end crystals are protected.</red>"));
+        messages.put("no-permission", localeYaml.getString("messages.no-permission", "<red>You do not have permission to do that.</red>"));
+        messages.put("reloaded", localeYaml.getString("messages.reloaded", "<green>Configuration reloaded from <white>%path%</white>.</green>"));
+        messages.put("toggle-updated", localeYaml.getString("messages.toggle-updated", "<green><white>%setting%</white> is now <white>%value%</white>.</green>"));
+        messages.put("unknown-setting", localeYaml.getString("messages.unknown-setting", "<red>Unknown toggle: <white>%setting%</white></red>"));
+        messages.put("command-usage", localeYaml.getString("messages.command-usage", "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>"));
+        messages.put("player-break-blocked", localeYaml.getString("messages.player-break-blocked", "<red>These end crystals are protected.</red>"));
 
         List<String> configuredProtectedTypes = yaml.getStringList("protection.protected-entity-types");
         if (configuredProtectedTypes.isEmpty()) {
@@ -97,6 +98,7 @@ public record PluginConfig(
         }
 
         return new PluginConfig(
+                localeName,
                 parseCommandAliases(yaml.isList("commands.aliases")
                         ? yaml.getStringList("commands.aliases")
                         : DEFAULT_COMMAND_ALIASES),
@@ -110,7 +112,7 @@ public record PluginConfig(
                 yaml.getBoolean("debug.log-crystal-breaks", false),
                 List.copyOf(yaml.getStringList("live-toggles").isEmpty() ? DEFAULT_LIVE_TOGGLES : yaml.getStringList("live-toggles")),
                 parseProtectedEntityTypes(configuredProtectedTypes),
-                yaml.getString("messages.prefix", "<gray>[<gold>1MB-EndCrystals</gold>]</gray> "),
+                localeYaml.getString("messages.prefix", "<gray>[<gold>1MB-EndCrystals</gold>]</gray> "),
                 Map.copyOf(messages)
         );
     }

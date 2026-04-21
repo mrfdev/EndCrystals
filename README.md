@@ -20,15 +20,15 @@ The produced jar is named:
 - Optionally blocks player projectiles from breaking protected crystals
 - Keeps The End configurable so dragon-fight style gameplay can stay intact if desired
 - Uses the normal Paper plugin data folder: `plugins/1MB-EndCrystals/config.yml`
-- Migrates the misplaced legacy home-folder config into the correct server-local folder on first startup
+- Uses locale-ready message files in `plugins/1MB-EndCrystals/Translations/`
 - Supports `/_endcrystals reload`
 - Supports `/_endcrystals toggle [setting] [true|false]` for live boolean config toggles
 - Supports `/_endcrystals debug` for runtime/build/config diagnostics
 - Supports configurable command aliases from `config.yml`
 - Uses MiniMessage formatting for plugin output
-- Uses strict permission nodes with op not automatically bypassing protection
+- Keeps protection enabled by default while admin and break access stay permission-driven
 - Targets Java `25` and modern Paper builds
-- Builds with Gradle from a fresh clone without requiring any private `/servers/` test setup
+- Builds with Gradle from a fresh clone
 
 ## Commands
 
@@ -54,7 +54,7 @@ If another plugin or the server already owns one of those names, 1MB-EndCrystals
 - `onembendcrystals.toggle`
 - `onembendcrystals.break`
 
-All of these permissions default to `false`, so being op alone does not grant them. `onembendcrystals.admin` grants the command permissions. `onembendcrystals.break` allows a player to break otherwise protected crystals.
+Protection is enabled by default through the config values under `protection.*`. By default, regular players and ops are both blocked from breaking protected crystals or using the management commands. `onembendcrystals.break` must be granted explicitly to allow a player to break otherwise protected crystals, and `onembendcrystals.admin` or the individual command nodes must be granted explicitly to allow management access.
 
 ## Config
 
@@ -62,12 +62,15 @@ The plugin reads and writes its main config here:
 
 `plugins/1MB-EndCrystals/config.yml`
 
-Each Paper server gets its own local config folder, which is the normal Bukkit/Paper behavior.
+Locale files live here:
 
-If you are upgrading from an older build that wrote to `~/plugins/1MB-EndCrystals/config.yml`, the plugin will copy that legacy file into the server-local plugin folder on first startup if the new server-local config does not already exist.
+`plugins/1MB-EndCrystals/Translations/Locale_EN.yml`
+
+Each Paper server gets its own local config and translation folder, which is the normal Bukkit/Paper behavior.
 
 Important defaults:
 
+- `translations.locale: Locale_EN`
 - `commands.aliases: [endcrystals, ec]`
 - `protection.prevent-block-damage: true`
 - `protection.prevent-player-break: true`
@@ -88,23 +91,21 @@ This section summarizes the modernization work completed for the current refresh
 - Retargeted the plugin for modern Paper, validated against `1.21.11` and `26.1.2`
 - Standardized the shipped jar name to `1MB-EndCrystals-v2.0.1-021-v25-26.1.2.jar`
 - Reworked config storage to use the active server's `plugins/1MB-EndCrystals/config.yml`
-- Added one-time migration support for the old misplaced `~/plugins/1MB-EndCrystals/config.yml`
 - Added `/_endcrystals reload`
 - Added `/_endcrystals debug`
 - Added live config toggles through `/_endcrystals toggle [setting] [true|false]`
 - Moved command aliases into `config.yml` so they can be added or removed without editing `plugin.yml`
 - Kept `/_endcrystals` as the permanent primary command
-- Switched to explicit `onembendcrystals.*` permission nodes with `default: false`
+- Kept protection enabled by default while moving admin and crystal-break access onto explicit `onembendcrystals.*` permission nodes
 - Made crystal breaking permission-driven instead of implicitly allowing ops
 - Expanded protection beyond blocks to cover decorative and item entities
 - Added protection for minecart and boat-style entities that were still vulnerable on the legacy path
 - Improved debug output to show build/runtime info, config path, permissions, live toggles, and active commands
-- Moved plugin messages into config and formatted output with MiniMessage
-- Updated docs so public builds do not depend on any private local `/servers/` test directory
+- Split plugin messages into locale files under `Translations/` and formatted output with MiniMessage
 
 ## Build
 
-The public build does not depend on any local `servers/` directory. A normal checkout builds against the Paper API from the Paper Maven repository, and any repo-local test servers are strictly optional private development tooling.
+A normal checkout builds against the Paper API from the Paper Maven repository.
 
 Build with:
 
@@ -120,10 +121,23 @@ Output jar:
 
 1. Build the jar.
 2. Copy it into a Paper server's `plugins/` folder.
-3. Start the server once so the plugin creates `plugins/1MB-EndCrystals/config.yml`.
-4. Use `/_endcrystals debug` to verify runtime information.
+3. Start the server once so the plugin creates `plugins/1MB-EndCrystals/config.yml` and `plugins/1MB-EndCrystals/Translations/Locale_EN.yml`.
+4. Use `/_endcrystals debug` to verify runtime information, including the active locale file.
 5. Use `/_endcrystals reload` after editing the config.
+
+## Support
+
+If you run into a bug, want to request a feature, or need help using the plugin, please use the [GitHub Issues](https://github.com/mrfdev/EndCrystals/issues) section for this repository.
+
+## Credits
+
+- mrfloris ([GitHub: `mrfdev`](https://github.com/mrfdev)) for the original plugin, project direction, and the v2 refresh goals
+- OpenAI for helping modernize and ship the v2 update
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.
 
 ## Testing Notes
 
-The plugin is meant to be testable without WorldGuard present. If an end crystal explodes near normal blocks, the explosion should still happen but the blocks should remain intact while the plugin is enabled. Any `/servers/` directory used in development is for private local testing only and is not part of the public build flow.
+The plugin is meant to be testable without WorldGuard present. If an end crystal explodes near normal blocks, the explosion should still happen but the blocks should remain intact while the plugin is enabled.

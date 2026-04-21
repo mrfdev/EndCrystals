@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,34 +17,32 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class ExternalConfigManager {
 
+    private static final String DEFAULT_LOCALE_FILE = "Locale_EN.yml";
+
     private final EndCrystalsPlugin plugin;
     private final Path configDirectory;
     private final Path configPath;
-    private final Path legacyConfigPath;
+    private final Path translationsDirectory;
 
     private YamlConfiguration yaml;
+    private YamlConfiguration localeYaml;
     private PluginConfig currentConfig;
+    private Path localePath;
 
     public ExternalConfigManager(EndCrystalsPlugin plugin) {
         this.plugin = plugin;
         this.configDirectory = plugin.getDataFolder().toPath().toAbsolutePath().normalize();
         this.configPath = this.configDirectory.resolve("config.yml");
-        this.legacyConfigPath = Path.of(System.getProperty("user.home"), "plugins", plugin.getName(), "config.yml")
-                .toAbsolutePath()
-                .normalize();
+        this.translationsDirectory = this.configDirectory.resolve("Translations");
     }
 
     public void initialize() {
         try {
             Files.createDirectories(configDirectory);
+            Files.createDirectories(translationsDirectory);
 
             if (Files.notExists(configPath)) {
-                if (Files.exists(legacyConfigPath)) {
-                    Files.copy(legacyConfigPath, configPath);
-                    plugin.getLogger().info("Copied legacy config from " + legacyConfigPath + " to " + configPath);
-                } else {
-                    copyEmbeddedConfig();
-                }
+                copyEmbeddedConfig();
             }
         } catch (IOException exception) {
             throw new IllegalStateException("Could not initialize config at " + configPath, exception);
@@ -68,7 +66,22 @@ public final class ExternalConfigManager {
             throw new IllegalStateException("Could not merge default config values into " + configPath, exception);
         }
 
-        this.currentConfig = PluginConfig.from(yaml);
+        String resolvedLocaleFile = normalizeLocaleFileName(yaml.getString("translations.locale", DEFAULT_LOCALE_FILE));
+        this.localePath = translationsDirectory.resolve(resolvedLocaleFile);
+        initializeLocaleFile(resolvedLocaleFile);
+        this.localeYaml = YamlConfiguration.loadConfiguration(localePath.toFile());
+
+        try {
+            YamlConfiguration localeDefaults = loadEmbeddedLocaleDefaults(resolvedLocaleFile);
+            localeYaml.addDefaults(localeDefaults);
+            localeYaml.options().copyDefaults(true);
+            normalizeLocaleConfig(localeDefaults);
+            localeYaml.save(localePath.toFile());
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not merge default locale values into " + localePath, exception);
+        }
+
+        this.currentConfig = PluginConfig.from(yaml, localeYaml, resolvedLocaleFile);
     }
 
     public boolean toggle(String path, Boolean explicitValue) {
@@ -105,6 +118,11 @@ public final class ExternalConfigManager {
         return configPath;
     }
 
+    public Path localePath() {
+        ensureLoaded();
+        return localePath;
+    }
+
     public Map<String, Boolean> liveToggleStates() {
         ensureLoaded();
 
@@ -124,6 +142,8 @@ public final class ExternalConfigManager {
     private void ensureLoaded() {
         Objects.requireNonNull(currentConfig, "Config has not been loaded yet.");
         Objects.requireNonNull(yaml, "Config has not been loaded yet.");
+        Objects.requireNonNull(localeYaml, "Locale has not been loaded yet.");
+        Objects.requireNonNull(localePath, "Locale has not been loaded yet.");
     }
 
     private void copyEmbeddedConfig() throws IOException {
@@ -146,17 +166,6 @@ public final class ExternalConfigManager {
         yaml.set("live-toggles", liveToggles);
 
         normalizeProtectedEntityTypes(defaults);
-
-        String legacyUsageSingular = "<yellow>Use <white>/_endcrystal debug</white>, <white>reload</white>, or <white>toggle &lt;setting&gt; [true|false]</white>.</yellow>";
-        String legacyUsagePlural = "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle &lt;setting&gt; [true|false]</white>.</yellow>";
-        String legacyUsageBracket = "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>";
-        String defaultUsage = defaults.getString("messages.command-usage");
-        String currentUsage = yaml.getString("messages.command-usage");
-        if ((legacyUsageSingular.equals(currentUsage)
-                || legacyUsagePlural.equals(currentUsage)
-                || legacyUsageBracket.equals(currentUsage)) && defaultUsage != null) {
-            yaml.set("messages.command-usage", defaultUsage);
-        }
     }
 
     private void normalizeProtectedEntityTypes(YamlConfiguration defaults) {
@@ -191,5 +200,75 @@ public final class ExternalConfigManager {
             normalized.add(value.toUpperCase(java.util.Locale.ROOT));
         }
         return normalized;
+    }
+
+    private void initializeLocaleFile(String localeFileName) {
+        try {
+            if (Files.exists(localePath)) {
+                return;
+            }
+
+            YamlConfiguration localeDefaults = loadEmbeddedLocaleDefaults(localeFileName);
+
+            if (yaml.isConfigurationSection("messages")) {
+                for (String key : yaml.getConfigurationSection("messages").getKeys(true)) {
+                    localeDefaults.set("messages." + key, yaml.get("messages." + key));
+                }
+            }
+
+            localeDefaults.save(localePath.toFile());
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not initialize locale at " + localePath, exception);
+        }
+    }
+
+    private YamlConfiguration loadEmbeddedLocaleDefaults(String localeFileName) throws IOException {
+        String resourcePath = resolveEmbeddedLocaleResource(localeFileName);
+        try (InputStream resource = plugin.getResource(resourcePath)) {
+            if (resource == null) {
+                throw new IllegalStateException("Embedded locale resource was not found: " + resourcePath);
+            }
+
+            return YamlConfiguration.loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8));
+        }
+    }
+
+    private String resolveEmbeddedLocaleResource(String localeFileName) {
+        String requested = "Translations/" + localeFileName;
+        if (plugin.getResource(requested) != null) {
+            return requested;
+        }
+
+        if (!DEFAULT_LOCALE_FILE.equals(localeFileName)) {
+            plugin.getLogger().warning("Locale " + localeFileName + " was not bundled; falling back to " + DEFAULT_LOCALE_FILE);
+        }
+
+        return "Translations/" + DEFAULT_LOCALE_FILE;
+    }
+
+    private String normalizeLocaleFileName(String configuredLocale) {
+        String normalized = configuredLocale == null ? "" : configuredLocale.trim();
+        if (normalized.isBlank()) {
+            normalized = DEFAULT_LOCALE_FILE;
+        }
+
+        if (!normalized.toLowerCase(java.util.Locale.ROOT).endsWith(".yml")) {
+            normalized = normalized + ".yml";
+        }
+
+        return Path.of(normalized).getFileName().toString();
+    }
+
+    private void normalizeLocaleConfig(YamlConfiguration defaults) {
+        String legacyUsageSingular = "<yellow>Use <white>/_endcrystal debug</white>, <white>reload</white>, or <white>toggle &lt;setting&gt; [true|false]</white>.</yellow>";
+        String legacyUsagePlural = "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle &lt;setting&gt; [true|false]</white>.</yellow>";
+        String legacyUsageBracket = "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>";
+        String defaultUsage = defaults.getString("messages.command-usage");
+        String currentUsage = localeYaml.getString("messages.command-usage");
+        if ((legacyUsageSingular.equals(currentUsage)
+                || legacyUsagePlural.equals(currentUsage)
+                || legacyUsageBracket.equals(currentUsage)) && defaultUsage != null) {
+            localeYaml.set("messages.command-usage", defaultUsage);
+        }
     }
 }

@@ -86,6 +86,8 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
                 .formatted(System.getProperty("java.version", "unknown")), false);
         plugin.sendRich(sender, "<gray>Config:</gray> <white>%s</white>"
                 .formatted(plugin.configManager().configPath()), false);
+        plugin.sendRich(sender, "<gray>Locale:</gray> <white>%s</white> <gray>|</gray> <white>%s</white>"
+                .formatted(config.localeName(), plugin.configManager().localePath()), false);
         plugin.sendRich(sender, "<gray>Commands:</gray> <white>%s</white>"
                 .formatted(plugin.commandSummary()), false);
         plugin.sendRich(sender, "<gray>Placeholders:</gray> <white>None</white>", false);

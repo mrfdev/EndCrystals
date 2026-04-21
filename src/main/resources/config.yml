@@ -2,6 +2,11 @@
 # Stored in the active Paper server's plugins/1MB-EndCrystals/config.yml
 # so each server keeps its own local settings.
 
+translations:
+  # Locale files live in plugins/1MB-EndCrystals/Translations/
+  # and can be swapped with /_endcrystals reload.
+  locale: Locale_EN
+
 commands:
   # The main command /_endcrystals is always available.
   # These aliases are applied on startup and after /_endcrystals reload.
@@ -87,12 +92,3 @@ live-toggles:
   - protection.clear-explosion-yield
   - debug.log-block-protection
   - debug.log-crystal-breaks
-
-messages:
-  prefix: "<gray>[<gold>1MB-EndCrystals</gold>]</gray> "
-  no-permission: "<red>You do not have permission to do that.</red>"
-  reloaded: "<green>Configuration reloaded from <white>%path%</white>.</green>"
-  toggle-updated: "<green><white>%setting%</white> is now <white>%value%</white>.</green>"
-  unknown-setting: "<red>Unknown toggle: <white>%setting%</white></red>"
-  command-usage: "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>"
-  player-break-blocked: "<red>These end crystals are protected.</red>"
