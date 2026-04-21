@@ -12,7 +12,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.PluginDescriptionFile;
 
 public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
 
@@ -67,13 +66,12 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        PluginDescriptionFile description = plugin.getDescription();
         PluginConfig config = plugin.config();
         Map<String, Boolean> liveToggles = plugin.configManager().liveToggleStates();
 
         plugin.sendRich(sender, "<gold><bold>1MB-EndCrystals Debug</bold></gold>", true);
         plugin.sendRich(sender, "<gray>Version:</gray> <white>%s</white> <gray>(build %s)</gray>"
-                .formatted(description.getVersion(), plugin.buildMetadata().buildNumber()), false);
+                .formatted(plugin.getDescription().getVersion(), plugin.buildMetadata().buildNumber()), false);
         plugin.sendRich(sender, "<gray>Build Target:</gray> <white>Java %s</white>, <white>Paper %s</white>, <white>MC %s</white>"
                 .formatted(
                         plugin.buildMetadata().javaTarget(),
@@ -89,10 +87,10 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
         plugin.sendRich(sender, "<gray>Config:</gray> <white>%s</white>"
                 .formatted(plugin.configManager().configPath()), false);
         plugin.sendRich(sender, "<gray>Commands:</gray> <white>%s</white>"
-                .formatted(formatCommands(description)), false);
+                .formatted(plugin.commandSummary()), false);
         plugin.sendRich(sender, "<gray>Placeholders:</gray> <white>None</white>", false);
         plugin.sendRich(sender, "<gray>Permissions:</gray> <white>%s</white>"
-                .formatted(formatPermissions(description.getPermissions())), false);
+                .formatted(formatPermissions(plugin.getDescription().getPermissions())), false);
         plugin.sendRich(sender, "<gray>Protection:</gray> <white>prevent-block-damage=%s</white>, <white>prevent-player-break=%s</white>, <white>prevent-projectile-break=%s</white>"
                 .formatted(
                         config.preventBlockDamage(),
@@ -104,9 +102,13 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
                         config.allowPlayerBreakInTheEnd(),
                         config.clearExplosionYield()
                 ), false);
+        plugin.sendRich(sender, "<gray>Entity Protection:</gray> <white>prevent-protected-entity-damage=%s</white>"
+                .formatted(config.preventProtectedEntityDamage()), false);
+        plugin.sendRich(sender, "<gray>Protected Types:</gray> <white>%s</white>"
+                .formatted(config.protectedEntityTypesDisplay().isBlank() ? "None" : config.protectedEntityTypesDisplay()), false);
         plugin.sendRich(sender, "<gray>Live Toggles:</gray> <white>%s</white>"
                 .formatted(formatLiveToggles(liveToggles)), false);
-        plugin.sendRich(sender, "<gray>Hint:</gray> <white>/_endcrystals toggle &lt;setting&gt; [true|false]</white>", false);
+        plugin.sendRich(sender, "<gray>Hint:</gray> <white>/_endcrystals toggle [setting] [true|false]</white>", false);
         return true;
     }
 
@@ -185,23 +187,6 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
         return values.stream()
                 .filter(value -> value.toLowerCase(Locale.ROOT).startsWith(lowerToken))
                 .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private String formatCommands(PluginDescriptionFile description) {
-        if (description.getCommands() == null || description.getCommands().isEmpty()) {
-            return "None";
-        }
-
-        return description.getCommands().entrySet().stream()
-                .map(entry -> {
-                    Object aliases = entry.getValue().get("aliases");
-                    if (aliases == null) {
-                        return "/" + entry.getKey();
-                    }
-
-                    return "/" + entry.getKey() + " aliases=" + aliases;
-                })
-                .collect(Collectors.joining(", "));
     }
 
     private String formatPermissions(List<Permission> permissions) {

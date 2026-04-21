@@ -11,24 +11,23 @@ commands:
   _endcrystals:
     description: End crystal protection admin commands
     usage: /_endcrystals <debug|reload|toggle>
-    aliases: [endcrystals, ec]
 permissions:
-  1mb.endcrystals.admin:
+  onembendcrystals.admin:
     description: Grants every 1MB-EndCrystals admin command
-    default: op
+    default: false
     children:
-      1mb.endcrystals.debug: true
-      1mb.endcrystals.reload: true
-      1mb.endcrystals.toggle: true
-  1mb.endcrystals.debug:
+      onembendcrystals.debug: true
+      onembendcrystals.reload: true
+      onembendcrystals.toggle: true
+  onembendcrystals.debug:
     description: Allows the debug subcommand
-    default: op
-  1mb.endcrystals.reload:
+    default: false
+  onembendcrystals.reload:
     description: Allows the reload subcommand
-    default: op
-  1mb.endcrystals.toggle:
+    default: false
+  onembendcrystals.toggle:
     description: Allows live config toggles
-    default: op
-  1mb.endcrystals.bypass:
+    default: false
+  onembendcrystals.break:
     description: Allows breaking protected end crystals
-    default: op
+    default: false

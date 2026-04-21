@@ -1,6 +1,15 @@
-# 1MB-EndCrystals global config
-# Stored in ~/plugins/1MB-EndCrystals/config.yml so multiple local Paper servers
-# can share one copy of the settings when they run under the same user account.
+# 1MB-EndCrystals config
+# Stored in the active Paper server's plugins/1MB-EndCrystals/config.yml
+# so each server keeps its own local settings.
+
+commands:
+  # The main command /_endcrystals is always available.
+  # These aliases are applied on startup and after /_endcrystals reload.
+  # Set this to [] if you do not want any extra aliases.
+  # Aliases already claimed by another plugin or the server are skipped with a warning.
+  aliases:
+    - endcrystals
+    - ec
 
 protection:
   # Prevent end crystal explosions from breaking blocks.
@@ -12,8 +21,50 @@ protection:
   # Prevent player-fired projectiles from breaking protected crystals.
   prevent-projectile-break: true
 
+  # Prevent configured decorative/item entities from being destroyed by end crystal explosions.
+  prevent-protected-entity-damage: true
+
+  # These entity types are protected from end crystal explosion damage.
+  protected-entity-types:
+    - ARMOR_STAND
+    - ITEM
+    - ITEM_FRAME
+    - GLOW_ITEM_FRAME
+    - PAINTING
+    - ITEM_DISPLAY
+    - BLOCK_DISPLAY
+    - TEXT_DISPLAY
+    - LEASH_KNOT
+    - MINECART
+    - CHEST_MINECART
+    - COMMAND_BLOCK_MINECART
+    - FURNACE_MINECART
+    - HOPPER_MINECART
+    - SPAWNER_MINECART
+    - TNT_MINECART
+    - ACACIA_BOAT
+    - ACACIA_CHEST_BOAT
+    - BAMBOO_RAFT
+    - BAMBOO_CHEST_RAFT
+    - BIRCH_BOAT
+    - BIRCH_CHEST_BOAT
+    - CHERRY_BOAT
+    - CHERRY_CHEST_BOAT
+    - DARK_OAK_BOAT
+    - DARK_OAK_CHEST_BOAT
+    - JUNGLE_BOAT
+    - JUNGLE_CHEST_BOAT
+    - MANGROVE_BOAT
+    - MANGROVE_CHEST_BOAT
+    - OAK_BOAT
+    - OAK_CHEST_BOAT
+    - PALE_OAK_BOAT
+    - PALE_OAK_CHEST_BOAT
+    - SPRUCE_BOAT
+    - SPRUCE_CHEST_BOAT
+
   # Allow players to break crystals in The End for dragon-fight style gameplay.
-  allow-player-break-in-the-end: true
+  allow-player-break-in-the-end: false
 
   # Clear explosion drops/yield when block damage prevention is active.
   clear-explosion-yield: true
@@ -26,11 +77,12 @@ debug:
   log-crystal-breaks: false
 
 # These boolean config paths can be changed immediately with:
-# /_endcrystals toggle <setting> [true|false]
+# /_endcrystals toggle [setting] [true|false]
 live-toggles:
   - protection.prevent-block-damage
   - protection.prevent-player-break
   - protection.prevent-projectile-break
+  - protection.prevent-protected-entity-damage
   - protection.allow-player-break-in-the-end
   - protection.clear-explosion-yield
   - debug.log-block-protection
@@ -42,5 +94,5 @@ messages:
   reloaded: "<green>Configuration reloaded from <white>%path%</white>.</green>"
   toggle-updated: "<green><white>%setting%</white> is now <white>%value%</white>.</green>"
   unknown-setting: "<red>Unknown toggle: <white>%setting%</white></red>"
-  command-usage: "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle &lt;setting&gt; [true|false]</white>.</yellow>"
+  command-usage: "<yellow>Use <white>/_endcrystals debug</white>, <white>reload</white>, or <white>toggle [setting] [true|false]</white>.</yellow>"
   player-break-blocked: "<red>These end crystals are protected.</red>"

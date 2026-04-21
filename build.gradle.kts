@@ -8,6 +8,7 @@ description = "1MB helper plugin that prevents end crystals from damaging blocks
 val pluginVersion = providers.gradleProperty("pluginVersion").get()
 val buildNumber = providers.gradleProperty("buildNumber").get()
 val javaTarget = providers.gradleProperty("javaTarget").get()
+val paperApiVersion = providers.gradleProperty("paperApiVersion").get()
 val targetPaperVersion = providers.gradleProperty("targetPaperVersion").get()
 val targetMinecraftVersion = providers.gradleProperty("targetMinecraftVersion").get()
 
@@ -18,20 +19,8 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
-val localPaperApi = layout.projectDirectory.file(
-    "servers/Server-One-Paper-1.21.11/libraries/io/papermc/paper/paper-api/1.21.11-R0.1-SNAPSHOT/paper-api-1.21.11-R0.1-SNAPSHOT.jar"
-).asFile
-val localPaperLibraries = layout.projectDirectory.dir("servers/Server-One-Paper-1.21.11/libraries").asFile
-
 dependencies {
-    if (localPaperApi.exists() && localPaperLibraries.isDirectory) {
-        compileOnly(files(localPaperApi))
-        compileOnly(fileTree(localPaperLibraries) {
-            include("**/*.jar")
-        })
-    } else {
-        compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    }
+    compileOnly("io.papermc.paper:paper-api:$paperApiVersion")
 }
 
 java {
