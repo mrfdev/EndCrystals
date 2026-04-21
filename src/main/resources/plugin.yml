@@ -1,9 +1,34 @@
-name: ${project.artifactId}
-version: ${project.version}
-main: com.mrfloris.endcrystals.pluginEvents
-api-version: 1.17
-prefix: ${project.name}
+name: ${pluginName}
+version: ${pluginVersion}
+main: com.mrfloris.endcrystals.EndCrystalsPlugin
+api-version: "1.21"
+prefix: ${pluginName}
 author: adrianwowk
 authors: [mrfloris, the456gamer]
-description: ${project.description}
-website: ${project.url}
+description: ${pluginDescription}
+website: ${website}
+commands:
+  _endcrystals:
+    description: End crystal protection admin commands
+    usage: /_endcrystals <debug|reload|toggle>
+    aliases: [endcrystals, ec]
+permissions:
+  1mb.endcrystals.admin:
+    description: Grants every 1MB-EndCrystals admin command
+    default: op
+    children:
+      1mb.endcrystals.debug: true
+      1mb.endcrystals.reload: true
+      1mb.endcrystals.toggle: true
+  1mb.endcrystals.debug:
+    description: Allows the debug subcommand
+    default: op
+  1mb.endcrystals.reload:
+    description: Allows the reload subcommand
+    default: op
+  1mb.endcrystals.toggle:
+    description: Allows live config toggles
+    default: op
+  1mb.endcrystals.bypass:
+    description: Allows breaking protected end crystals
+    default: op
