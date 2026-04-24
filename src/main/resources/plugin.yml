@@ -1,7 +1,7 @@
 name: ${pluginName}
 version: ${pluginVersion}
 main: com.mrfloris.endcrystals.EndCrystalsPlugin
-api-version: "1.21"
+api-version: "${declaredApiVersion}"
 prefix: ${pluginName}
 author: adrianwowk
 authors: [mrfloris, the456gamer]

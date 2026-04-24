@@ -7,7 +7,9 @@ import java.util.Properties;
 public record BuildMetadata(
         String pluginVersion,
         String buildNumber,
+        String paperApiVersion,
         String targetPaperVersion,
+        String declaredApiVersion,
         String targetMinecraftVersion,
         String javaTarget
 ) {
@@ -26,7 +28,9 @@ public record BuildMetadata(
         return new BuildMetadata(
                 properties.getProperty("pluginVersion", "unknown"),
                 properties.getProperty("buildNumber", "unknown"),
+                properties.getProperty("paperApiVersion", "unknown"),
                 properties.getProperty("targetPaperVersion", "unknown"),
+                properties.getProperty("declaredApiVersion", "unknown"),
                 properties.getProperty("targetMinecraftVersion", "unknown"),
                 properties.getProperty("javaTarget", "unknown")
         );

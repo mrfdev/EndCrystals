@@ -7,9 +7,9 @@ This refresh targets Java 25 and has been built for modern Paper installs, with 
 - Paper `1.21.11`
 - Paper `26.1.2`
 
-The produced jar is named:
+The current release jar is named:
 
-`1MB-EndCrystals-v2.0.1-021-v25-26.1.2.jar`
+`1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
 
 ## Feature List
 
@@ -89,7 +89,7 @@ This section summarizes the modernization work completed for the current refresh
 
 - Migrated the plugin to a Gradle build for Java `25`
 - Retargeted the plugin for modern Paper, validated against `1.21.11` and `26.1.2`
-- Standardized the shipped jar name to `1MB-EndCrystals-v2.0.1-021-v25-26.1.2.jar`
+- Standardized the shipped jar name to `1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
 - Reworked config storage to use the active server's `plugins/1MB-EndCrystals/config.yml`
 - Added `/_endcrystals reload`
 - Added `/_endcrystals debug`
@@ -105,7 +105,9 @@ This section summarizes the modernization work completed for the current refresh
 
 ## Build
 
-A normal checkout builds against the Paper API from the Paper Maven repository.
+A normal checkout builds against the Paper API from the Paper Maven repository and copies the release jar into `libs/`.
+
+The current build compiles against Paper API `26.1.2.build.20-alpha` and declares a plugin compatibility floor of `api-version: 1.21.11`.
 
 Build with:
 
@@ -115,7 +117,7 @@ Build with:
 
 Output jar:
 
-`build/libs/1MB-EndCrystals-v2.0.1-021-v25-26.1.2.jar`
+`libs/1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
 
 ## Install
 

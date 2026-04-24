@@ -3,3 +3,4 @@
 build/
 out/
 /servers/
+libs/*.jar

@@ -2,7 +2,6 @@ package com.mrfloris.endcrystals;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class ExternalConfigManager {
@@ -50,13 +50,11 @@ public final class ExternalConfigManager {
     }
 
     public void reload() {
-        this.yaml = YamlConfiguration.loadConfiguration(configPath.toFile());
+        this.yaml = loadYaml(configPath);
 
         try (InputStream resource = plugin.getResource("config.yml")) {
             if (resource != null) {
-                YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
-                        new InputStreamReader(resource, StandardCharsets.UTF_8)
-                );
+                YamlConfiguration defaults = loadYaml(resource, "config.yml");
                 yaml.addDefaults(defaults);
                 yaml.options().copyDefaults(true);
                 normalizeConfig(defaults);
@@ -69,7 +67,7 @@ public final class ExternalConfigManager {
         String resolvedLocaleFile = normalizeLocaleFileName(yaml.getString("translations.locale", DEFAULT_LOCALE_FILE));
         this.localePath = translationsDirectory.resolve(resolvedLocaleFile);
         initializeLocaleFile(resolvedLocaleFile);
-        this.localeYaml = YamlConfiguration.loadConfiguration(localePath.toFile());
+        this.localeYaml = loadYaml(localePath);
 
         try {
             YamlConfiguration localeDefaults = loadEmbeddedLocaleDefaults(resolvedLocaleFile);
@@ -229,7 +227,7 @@ public final class ExternalConfigManager {
                 throw new IllegalStateException("Embedded locale resource was not found: " + resourcePath);
             }
 
-            return YamlConfiguration.loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8));
+            return loadYaml(resource, resourcePath);
         }
     }
 
@@ -269,6 +267,31 @@ public final class ExternalConfigManager {
                 || legacyUsagePlural.equals(currentUsage)
                 || legacyUsageBracket.equals(currentUsage)) && defaultUsage != null) {
             localeYaml.set("messages.command-usage", defaultUsage);
+        }
+    }
+
+    private YamlConfiguration loadYaml(Path path) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        if (Files.notExists(path)) {
+            return configuration;
+        }
+
+        try {
+            configuration.loadFromString(Files.readString(path, StandardCharsets.UTF_8));
+            return configuration;
+        } catch (IOException | InvalidConfigurationException exception) {
+            throw new IllegalStateException("Could not load YAML from " + path, exception);
+        }
+    }
+
+    private YamlConfiguration loadYaml(InputStream stream, String sourceName) {
+        YamlConfiguration configuration = new YamlConfiguration();
+
+        try {
+            configuration.loadFromString(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+            return configuration;
+        } catch (IOException | InvalidConfigurationException exception) {
+            throw new IllegalStateException("Could not load YAML from " + sourceName, exception);
         }
     }
 }

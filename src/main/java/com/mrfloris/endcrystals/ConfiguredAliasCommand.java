@@ -1,7 +1,6 @@
 package com.mrfloris.endcrystals;
 
 import java.util.List;
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -14,11 +13,6 @@ final class ConfiguredAliasCommand extends Command {
         super(alias, delegate.getDescription(), delegate.getUsage(), List.of());
         this.delegate = delegate;
         setPermission(delegate.getPermission());
-
-        Component permissionMessage = delegate.permissionMessage();
-        if (permissionMessage != null) {
-            permissionMessage(permissionMessage);
-        }
     }
 
     @Override

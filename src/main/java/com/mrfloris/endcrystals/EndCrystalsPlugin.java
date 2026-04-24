@@ -169,7 +169,7 @@ public final class EndCrystalsPlugin extends JavaPlugin {
 
         java.util.List<String> activeAliases = new java.util.ArrayList<>();
         Set<String> unavailableAliases = new LinkedHashSet<>();
-        String fallbackPrefix = getDescription().getName().toLowerCase(java.util.Locale.ROOT);
+        String fallbackPrefix = getPluginMeta().getName().toLowerCase(java.util.Locale.ROOT);
 
         for (String alias : config.commandAliases()) {
             Command existing = commandMap.getCommand(alias);

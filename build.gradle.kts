@@ -10,6 +10,7 @@ val buildNumber = providers.gradleProperty("buildNumber").get()
 val javaTarget = providers.gradleProperty("javaTarget").get()
 val paperApiVersion = providers.gradleProperty("paperApiVersion").get()
 val targetPaperVersion = providers.gradleProperty("targetPaperVersion").get()
+val declaredApiVersion = providers.gradleProperty("declaredApiVersion").get()
 val targetMinecraftVersion = providers.gradleProperty("targetMinecraftVersion").get()
 
 version = pluginVersion
@@ -32,6 +33,7 @@ java {
 tasks.compileJava {
     options.encoding = "UTF-8"
     options.release.set(javaTarget.toInt())
+    options.compilerArgs.add("-Xlint:deprecation")
 }
 
 tasks.processResources {
@@ -41,7 +43,9 @@ tasks.processResources {
         "pluginDescription" to project.description,
         "buildNumber" to buildNumber,
         "javaTarget" to javaTarget,
+        "paperApiVersion" to paperApiVersion,
         "targetPaperVersion" to targetPaperVersion,
+        "declaredApiVersion" to declaredApiVersion,
         "targetMinecraftVersion" to targetMinecraftVersion,
         "website" to "https://github.com/mrfdev/EndCrystals"
     )
@@ -67,4 +71,14 @@ tasks.jar {
             "Build-Java-Version" to javaTarget
         )
     }
+}
+
+val copyJarToLibs by tasks.registering(Copy::class) {
+    dependsOn(tasks.jar)
+    from(tasks.jar.flatMap { it.archiveFile })
+    into(layout.projectDirectory.dir("libs"))
+}
+
+tasks.build {
+    dependsOn(copyJarToLibs)
 }

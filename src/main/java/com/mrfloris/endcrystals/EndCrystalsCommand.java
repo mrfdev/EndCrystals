@@ -71,11 +71,16 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
 
         plugin.sendRich(sender, "<gold><bold>1MB-EndCrystals Debug</bold></gold>", true);
         plugin.sendRich(sender, "<gray>Version:</gray> <white>%s</white> <gray>(build %s)</gray>"
-                .formatted(plugin.getDescription().getVersion(), plugin.buildMetadata().buildNumber()), false);
-        plugin.sendRich(sender, "<gray>Build Target:</gray> <white>Java %s</white>, <white>Paper %s</white>, <white>MC %s</white>"
+                .formatted(plugin.getPluginMeta().getVersion(), plugin.buildMetadata().buildNumber()), false);
+        plugin.sendRich(sender, "<gray>Compiled Against:</gray> <white>Java %s</white>, <white>Paper API %s</white>, <white>Paper %s</white>"
                 .formatted(
                         plugin.buildMetadata().javaTarget(),
-                        plugin.buildMetadata().targetPaperVersion(),
+                        plugin.buildMetadata().paperApiVersion(),
+                        plugin.buildMetadata().targetPaperVersion()
+                ), false);
+        plugin.sendRich(sender, "<gray>Declared API Floor:</gray> <white>%s</white> <gray>|</gray> <gray>MC Compatibility:</gray> <white>%s</white>"
+                .formatted(
+                        plugin.buildMetadata().declaredApiVersion(),
                         plugin.buildMetadata().targetMinecraftVersion()
                 ), false);
         plugin.sendRich(sender, "<gray>Server:</gray> <white>%s</white> <gray>|</gray> <white>%s</white>"
@@ -92,7 +97,7 @@ public final class EndCrystalsCommand implements CommandExecutor, TabCompleter {
                 .formatted(plugin.commandSummary()), false);
         plugin.sendRich(sender, "<gray>Placeholders:</gray> <white>None</white>", false);
         plugin.sendRich(sender, "<gray>Permissions:</gray> <white>%s</white>"
-                .formatted(formatPermissions(plugin.getDescription().getPermissions())), false);
+                .formatted(formatPermissions(plugin.getPluginMeta().getPermissions())), false);
         plugin.sendRich(sender, "<gray>Protection:</gray> <white>prevent-block-damage=%s</white>, <white>prevent-player-break=%s</white>, <white>prevent-projectile-break=%s</white>"
                 .formatted(
                         config.preventBlockDamage(),
