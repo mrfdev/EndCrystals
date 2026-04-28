@@ -9,7 +9,7 @@ This refresh targets Java 25 and has been built for modern Paper installs, with 
 
 The current release jar is named:
 
-`1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
+`1MB-EndCrystals-v2.0.1-024-v25-26.1.2.jar`
 
 ## Feature List
 
@@ -68,6 +68,8 @@ Locale files live here:
 
 Each Paper server gets its own local config and translation folder, which is the normal Bukkit/Paper behavior.
 
+Every setting in `config.yml` ships with comments that explain the default, expected format, and whether the change is live, reload-based, or restart-based. Existing values are preserved, and missing defaults are backfilled automatically.
+
 Important defaults:
 
 - `translations.locale: Locale_EN`
@@ -89,8 +91,9 @@ This section summarizes the modernization work completed for the current refresh
 
 - Migrated the plugin to a Gradle build for Java `25`
 - Retargeted the plugin for modern Paper, validated against `1.21.11` and `26.1.2`
-- Standardized the shipped jar name to `1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
+- Standardized the shipped jar name to `1MB-EndCrystals-v2.0.1-024-v25-26.1.2.jar`
 - Reworked config storage to use the active server's `plugins/1MB-EndCrystals/config.yml`
+- Improved config and locale saving so comments are preserved while missing defaults are added safely
 - Added `/_endcrystals reload`
 - Added `/_endcrystals debug`
 - Added live config toggles through `/_endcrystals toggle [setting] [true|false]`
@@ -117,7 +120,7 @@ Build with:
 
 Output jar:
 
-`libs/1MB-EndCrystals-v2.0.1-023-v25-26.1.2.jar`
+`libs/1MB-EndCrystals-v2.0.1-024-v25-26.1.2.jar`
 
 ## Install
 

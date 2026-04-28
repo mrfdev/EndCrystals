@@ -1,35 +1,55 @@
-# 1MB-EndCrystals config
-# Stored in the active Paper server's plugins/1MB-EndCrystals/config.yml
-# so each server keeps its own local settings.
+# 1MB-EndCrystals configuration file.
+# File location: plugins/1MB-EndCrystals/config.yml
+# This file is read on plugin startup. Missing settings are added automatically on reload or restart.
 
 translations:
-  # Locale files live in plugins/1MB-EndCrystals/Translations/
-  # and can be swapped with /_endcrystals reload.
+  # Chooses which locale file to load from plugins/1MB-EndCrystals/Translations/.
+  # Default: Locale_EN
+  # Expected values: a locale file name with or without .yml, for example Locale_EN or Locale_EN.yml.
+  # Reload behavior: requires /_endcrystals reload or a server restart.
   locale: Locale_EN
 
 commands:
-  # The main command /_endcrystals is always available.
-  # These aliases are applied on startup and after /_endcrystals reload.
+  # Extra command aliases that forward to /_endcrystals.
+  # Default: [endcrystals, ec]
+  # Expected values: a YAML list of unique command labels without a leading slash or spaces.
   # Set this to [] if you do not want any extra aliases.
+  # Reload behavior: requires /_endcrystals reload or a server restart.
   # Aliases already claimed by another plugin or the server are skipped with a warning.
   aliases:
     - endcrystals
     - ec
 
 protection:
-  # Prevent end crystal explosions from breaking blocks.
+  # Prevents end crystal explosions from changing or removing blocks.
+  # Default: true
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   prevent-block-damage: true
 
-  # Prevent direct player hits from breaking protected crystals.
+  # Blocks direct player hits from breaking protected end crystals unless the player has bypass permission.
+  # Default: true
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   prevent-player-break: true
 
-  # Prevent player-fired projectiles from breaking protected crystals.
+  # Blocks player-fired projectiles from breaking protected end crystals unless the shooter has bypass permission.
+  # Default: true
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   prevent-projectile-break: true
 
-  # Prevent configured decorative/item entities from being destroyed by end crystal explosions.
+  # Protects the configured entity types below from end crystal explosion damage.
+  # Default: true
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   prevent-protected-entity-damage: true
 
-  # These entity types are protected from end crystal explosion damage.
+  # Entity types protected from end crystal explosion damage when prevent-protected-entity-damage is true.
+  # Default: the decorative, display, minecart, and boat or raft types listed below.
+  # Expected values: a YAML list of valid Bukkit or Paper EntityType names in uppercase.
+  # Invalid or unknown names are ignored safely.
+  # Reload behavior: requires /_endcrystals reload or a server restart.
   protected-entity-types:
     - ARMOR_STAND
     - ITEM
@@ -68,21 +88,38 @@ protection:
     - SPRUCE_BOAT
     - SPRUCE_CHEST_BOAT
 
-  # Allow players to break crystals in The End for dragon-fight style gameplay.
+  # Allows all players to break end crystals in The End even when the player and projectile protections are enabled.
+  # Default: false
+  # Expected values: true or false.
+  # This is intended for vanilla dragon-fight style gameplay and is not permission-based.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   allow-player-break-in-the-end: false
 
-  # Clear explosion drops/yield when block damage prevention is active.
+  # Clears explosion drop yield when prevent-block-damage is true so no block drops are produced.
+  # Default: true
+  # Expected values: true or false.
+  # This setting only matters while block damage prevention is enabled.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   clear-explosion-yield: true
 
 debug:
-  # Log each prevented crystal block-damage event to console.
+  # Logs each prevented end crystal block-damage event to the console.
+  # Default: false
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   log-block-protection: false
 
-  # Log blocked player crystal-break attempts to console.
+  # Logs blocked player crystal-break attempts to the console.
+  # Default: false
+  # Expected values: true or false.
+  # Reload behavior: takes effect immediately with /_endcrystals toggle or after /_endcrystals reload.
   log-crystal-breaks: false
 
-# These boolean config paths can be changed immediately with:
-# /_endcrystals toggle [setting] [true|false]
+# Boolean config paths that /_endcrystals toggle is allowed to edit.
+# Default: the paths listed below.
+# Expected values: a YAML list of boolean config paths from this file.
+# If a path is removed here, it becomes reload-only and can no longer be changed through the toggle command.
+# Reload behavior: changes to this list require /_endcrystals reload or a server restart before the command sees them.
 live-toggles:
   - protection.prevent-block-damage
   - protection.prevent-player-break

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -25,6 +26,7 @@ public final class ExternalConfigManager {
     private final Path translationsDirectory;
 
     private YamlConfiguration yaml;
+    private YamlConfiguration configDefaults;
     private YamlConfiguration localeYaml;
     private PluginConfig currentConfig;
     private Path localePath;
@@ -54,11 +56,12 @@ public final class ExternalConfigManager {
 
         try (InputStream resource = plugin.getResource("config.yml")) {
             if (resource != null) {
-                YamlConfiguration defaults = loadYaml(resource, "config.yml");
-                yaml.addDefaults(defaults);
+                this.configDefaults = loadYaml(resource, "config.yml");
+                yaml.addDefaults(configDefaults);
                 yaml.options().copyDefaults(true);
-                normalizeConfig(defaults);
-                yaml.save(configPath.toFile());
+                normalizeConfig(configDefaults);
+                applyCommentsFromDefaults(yaml, configDefaults);
+                saveYaml(yaml, configPath, "config");
             }
         } catch (IOException exception) {
             throw new IllegalStateException("Could not merge default config values into " + configPath, exception);
@@ -74,7 +77,8 @@ public final class ExternalConfigManager {
             localeYaml.addDefaults(localeDefaults);
             localeYaml.options().copyDefaults(true);
             normalizeLocaleConfig(localeDefaults);
-            localeYaml.save(localePath.toFile());
+            applyCommentsFromDefaults(localeYaml, localeDefaults);
+            saveYaml(localeYaml, localePath, "locale");
         } catch (IOException exception) {
             throw new IllegalStateException("Could not merge default locale values into " + localePath, exception);
         }
@@ -98,7 +102,10 @@ public final class ExternalConfigManager {
         yaml.set(path, newValue);
 
         try {
-            yaml.save(configPath.toFile());
+            if (configDefaults != null) {
+                applyCommentsFromDefaults(yaml, configDefaults);
+            }
+            saveYaml(yaml, configPath, "config");
         } catch (IOException exception) {
             throw new IllegalStateException("Could not save config to " + configPath, exception);
         }
@@ -214,7 +221,7 @@ public final class ExternalConfigManager {
                 }
             }
 
-            localeDefaults.save(localePath.toFile());
+            saveYaml(localeDefaults, localePath, "locale");
         } catch (IOException exception) {
             throw new IllegalStateException("Could not initialize locale at " + localePath, exception);
         }
@@ -270,8 +277,97 @@ public final class ExternalConfigManager {
         }
     }
 
+    private void applyCommentsFromDefaults(YamlConfiguration target, YamlConfiguration defaults) {
+        target.options().parseComments(true);
+        target.options().setHeader(mergeCommentLists(target.options().getHeader(), defaults.options().getHeader()));
+
+        applySectionComments(target, defaults, defaults);
+    }
+
+    private void applySectionComments(YamlConfiguration target, ConfigurationSection defaultsRoot, ConfigurationSection currentSection) {
+        for (String key : currentSection.getKeys(false)) {
+            String path = currentSection == defaultsRoot ? key : currentSection.getCurrentPath() + "." + key;
+            applyPathComments(target, defaultsRoot, path);
+
+            ConfigurationSection child = currentSection.getConfigurationSection(key);
+            if (child != null) {
+                applySectionComments(target, defaultsRoot, child);
+            }
+        }
+    }
+
+    private void applyPathComments(YamlConfiguration target, ConfigurationSection defaultsRoot, String path) {
+        List<String> mergedComments = mergeCommentLists(target.getComments(path), defaultsRoot.getComments(path));
+        if (!mergedComments.equals(target.getComments(path))) {
+            target.setComments(path, mergedComments);
+        }
+
+        List<String> mergedInlineComments = mergeCommentLists(target.getInlineComments(path), defaultsRoot.getInlineComments(path));
+        if (!mergedInlineComments.equals(target.getInlineComments(path))) {
+            target.setInlineComments(path, mergedInlineComments);
+        }
+    }
+
+    private List<String> mergeCommentLists(List<String> existing, List<String> defaults) {
+        List<String> safeExisting = sanitizeCommentLines(existing);
+        List<String> safeDefaults = sanitizeCommentLines(defaults);
+
+        if (safeExisting.isEmpty() && safeDefaults.isEmpty()) {
+            return List.of();
+        }
+
+        if (safeExisting.isEmpty()) {
+            return List.copyOf(safeDefaults);
+        }
+
+        if (safeDefaults.isEmpty() || safeExisting.equals(safeDefaults)) {
+            return List.copyOf(safeExisting);
+        }
+
+        List<String> merged = new ArrayList<>();
+        addUniqueComments(merged, safeDefaults);
+        addUniqueComments(merged, safeExisting);
+        return List.copyOf(merged);
+    }
+
+    private List<String> sanitizeCommentLines(List<String> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> sanitized = new ArrayList<>(comments.size());
+        for (String comment : comments) {
+            if (comment == null || comment.isBlank()) {
+                continue;
+            }
+            sanitized.add(comment);
+        }
+
+        if (sanitized.isEmpty()) {
+            return List.of();
+        }
+        return List.copyOf(sanitized);
+    }
+
+    private void addUniqueComments(List<String> target, List<String> source) {
+        for (String line : source) {
+            if (!target.contains(line)) {
+                target.add(line);
+            }
+        }
+    }
+
+    private void saveYaml(YamlConfiguration configuration, Path path, String label) throws IOException {
+        Files.createDirectories(path.getParent());
+        try {
+            configuration.save(path.toFile());
+        } catch (IOException exception) {
+            throw new IOException("Could not save " + label + " YAML to " + path, exception);
+        }
+    }
+
     private YamlConfiguration loadYaml(Path path) {
-        YamlConfiguration configuration = new YamlConfiguration();
+        YamlConfiguration configuration = newYamlConfiguration();
         if (Files.notExists(path)) {
             return configuration;
         }
@@ -285,7 +381,7 @@ public final class ExternalConfigManager {
     }
 
     private YamlConfiguration loadYaml(InputStream stream, String sourceName) {
-        YamlConfiguration configuration = new YamlConfiguration();
+        YamlConfiguration configuration = newYamlConfiguration();
 
         try {
             configuration.loadFromString(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
@@ -293,5 +389,11 @@ public final class ExternalConfigManager {
         } catch (IOException | InvalidConfigurationException exception) {
             throw new IllegalStateException("Could not load YAML from " + sourceName, exception);
         }
+    }
+
+    private YamlConfiguration newYamlConfiguration() {
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.options().parseComments(true);
+        return configuration;
     }
 }
